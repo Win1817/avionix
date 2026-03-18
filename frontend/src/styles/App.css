@@ -1,0 +1,5 @@
+/* App.css — component-level overrides */
+.analytics-page, .weather-page, .coord-page, .ml-page {
+  height: calc(100vh - 48px);
+  overflow-y: auto;
+}
