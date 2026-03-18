@@ -214,3 +214,21 @@ volumes:
 networks:
   avionix-net:
     driver: bridge
+
+  # ─── SIMULATOR ───────────────────────────────────────────────────────────────
+  simulator-service:
+    build: ./simulator-service
+    depends_on: [api-gateway, data-ingest-service, fdps-service, weather-service]
+    environment:
+      SIM_PORT: 3009
+      INGEST_URL: http://data-ingest-service:3008
+      FDPS_URL: http://fdps-service:3001
+      WEATHER_URL: http://weather-service:3005
+      GATEWAY_URL: http://api-gateway:4000
+      FLIGHT_COUNT: ${SIM_FLIGHT_COUNT:-20}
+      POSITION_INTERVAL_MS: ${SIM_POSITION_INTERVAL_MS:-4000}
+      AUTO_START: ${SIM_AUTO_START:-false}
+    ports: ["3009:3009"]
+    networks: [avionix-net]
+    restart: unless-stopped
+    profiles: ["simulator"]
