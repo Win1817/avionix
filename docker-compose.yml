@@ -1,0 +1,176 @@
+version: '3.9'
+
+services:
+  # ─── INFRASTRUCTURE ─────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: avionix
+      POSTGRES_USER: avionix
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./shared/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    ports: ["5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U avionix"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [avionix-net]
+
+  postgres-keycloak:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: ${KC_DB_PASSWORD}
+    volumes: [keycloak_db:/var/lib/postgresql/data]
+    networks: [avionix-net]
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports: ["6379:6379"]
+    networks: [avionix-net]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+
+  # ─── AUTH ────────────────────────────────────────────────────────────────────
+  keycloak:
+    build: ./keycloak
+    depends_on:
+      postgres-keycloak:
+        condition: service_started
+    environment:
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_HOSTNAME: ${KC_HOSTNAME:-localhost}
+    ports: ["8080:8080"]
+    networks: [avionix-net]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 30s
+      start_period: 90s
+
+  # ─── AVIONIX SERVICES ────────────────────────────────────────────────────────
+  fdps-service:
+    build: ./fdps-service
+    depends_on: [postgres, keycloak]
+    env_file: .env
+    environment:
+      FDPS_PORT: 3001
+      KEYCLOAK_URL: http://keycloak:8080
+    ports: ["3001:3001"]
+    networks: [avionix-net]
+    restart: unless-stopped
+
+  snet-service:
+    build: ./snet-service
+    depends_on: [postgres, keycloak, fdps-service]
+    env_file: .env
+    environment:
+      SNET_PORT: 3002
+      KEYCLOAK_URL: http://keycloak:8080
+    ports: ["3002:3002"]
+    networks: [avionix-net]
+    restart: unless-stopped
+
+  surveillance-service:
+    build: ./surveillance-service
+    depends_on: [postgres, keycloak]
+    env_file: .env
+    environment:
+      SURVEILLANCE_PORT: 3003
+      KEYCLOAK_URL: http://keycloak:8080
+    ports: ["3003:3003"]
+    networks: [avionix-net]
+    restart: unless-stopped
+
+  coordination-service:
+    build: ./coordination-service
+    depends_on: [postgres, keycloak]
+    env_file: .env
+    environment:
+      COORDINATION_PORT: 3004
+      KEYCLOAK_URL: http://keycloak:8080
+    ports: ["3004:3004"]
+    networks: [avionix-net]
+    restart: unless-stopped
+
+  weather-service:
+    build: ./weather-service
+    depends_on: [postgres, keycloak]
+    env_file: .env
+    environment:
+      WEATHER_PORT: 3005
+      KEYCLOAK_URL: http://keycloak:8080
+    ports: ["3005:3005"]
+    networks: [avionix-net]
+    restart: unless-stopped
+
+  analytics-service:
+    build: ./analytics-service
+    depends_on: [postgres, keycloak]
+    env_file: .env
+    environment:
+      ANALYTICS_PORT: 3006
+      KEYCLOAK_URL: http://keycloak:8080
+    ports: ["3006:3006"]
+    networks: [avionix-net]
+    restart: unless-stopped
+
+  ml-service:
+    build: ./ml-service
+    depends_on: [postgres, keycloak]
+    env_file: .env
+    environment:
+      ML_PORT: 3007
+      KEYCLOAK_URL: http://keycloak:8080
+    ports: ["3007:3007"]
+    networks: [avionix-net]
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    depends_on: [keycloak, fdps-service, snet-service]
+    environment:
+      VITE_KEYCLOAK_URL: http://localhost:8080
+      VITE_KEYCLOAK_REALM: avionix
+      VITE_KEYCLOAK_CLIENT_ID: avionix-frontend
+      VITE_FDPS_URL: http://localhost:3001
+      VITE_SNET_URL: http://localhost:3002
+      VITE_SURVEILLANCE_URL: http://localhost:3003
+      VITE_ANALYTICS_URL: http://localhost:3006
+    ports: ["5173:80"]
+    networks: [avionix-net]
+
+  # ─── MONITORING ──────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports: ["9090:9090"]
+    networks: [avionix-net]
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_AUTH_DISABLE_LOGIN_FORM: false
+    volumes: [grafana_data:/var/lib/grafana]
+    ports: ["3000:3000"]
+    networks: [avionix-net]
+
+volumes:
+  postgres_data:
+  keycloak_db:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  avionix-net:
+    driver: bridge
