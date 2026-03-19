@@ -269,11 +269,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_KEYCLOAK_URL: http://phantomx.zapto.org
-        VITE_KEYCLOAK_REALM: avionix
-        VITE_KEYCLOAK_CLIENT_ID: avionix-frontend
-        VITE_API_URL: http://phantomx.zapto.org/api
-        VITE_WS_URL: ws://phantomx.zapto.org/ws
+        VITE_KEYCLOAK_URL: ${VITE_KEYCLOAK_URL}
+        VITE_KEYCLOAK_REALM: ${VITE_KEYCLOAK_REALM}
+        VITE_KEYCLOAK_CLIENT_ID: ${VITE_KEYCLOAK_CLIENT_ID}
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_WS_URL: ${VITE_WS_URL}
     depends_on: [gateway-service]
     networks: [avionix-net]
 
