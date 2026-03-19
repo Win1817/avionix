@@ -23,7 +23,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_URL:http://keycloak:8080}/realms/avionix
+          issuer-uri: ${KEYCLOAK_ISSUER_URL:http://phantomx.zapto.org}/realms/avionix
           jwk-set-uri: ${KEYCLOAK_URL:http://keycloak:8080}/realms/avionix/protocol/openid-connect/certs
   kafka:
     bootstrap-servers: ${KAFKA_BROKERS:kafka:29092}
