@@ -1,8 +1,8 @@
 package com.avionix.coordination.controller;
 
-import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -109,7 +109,7 @@ public class CoordinationController {
     @Operation(summary = "Initiate sector handoff",
         description = "Creates a PENDING handoff from one sector to another. " +
                        "The receiving sector must ACCEPT before TRANSFER can be completed.")
-    @ApiResponse(responseCode = "201", description = "Handoff initiated")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Handoff initiated")
     public ResponseEntity<ApiResponse<HandoffRecord>> initiateHandoff(
             @Valid @RequestBody InitiateHandoffRequest req) {
         HandoffRecord h = HandoffRecord.builder()
@@ -128,7 +128,7 @@ public class CoordinationController {
     @PreAuthorize("hasAnyRole('ATC_CONTROLLER','ATC_SUPERVISOR','SUPER_ADMIN')")
     @Operation(summary = "Accept incoming handoff",
         description = "Receiving controller accepts responsibility. Status transitions PENDING → ACCEPTED.")
-    @ApiResponse(responseCode = "404", description = "Handoff not found")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Handoff not found")
     public ResponseEntity<ApiResponse<HandoffRecord>> acceptHandoff(@PathVariable UUID handoffId) {
         HandoffRecord h = HandoffRecord.builder().id(handoffId)
             .status(HandoffStatus.ACCEPTED).acceptedAt(Instant.now()).build();
@@ -162,7 +162,7 @@ public class CoordinationController {
     @PreAuthorize("hasAnyRole('ATC_CONTROLLER','ATC_SUPERVISOR','SUPER_ADMIN')")
     @Operation(summary = "Issue ATC clearance",
         description = "Issues and persists an ATC clearance. Types: ROUTE, ALTITUDE, SPEED, APPROACH, DEPARTURE, TAXI, PUSHBACK.")
-    @ApiResponse(responseCode = "201", description = "Clearance issued")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Clearance issued")
     public ResponseEntity<ApiResponse<ClearanceRecord>> issueClearance(
             @Valid @RequestBody IssueClearanceRequest req) {
         ClearanceRecord c = ClearanceRecord.builder()

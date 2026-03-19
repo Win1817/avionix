@@ -1,8 +1,8 @@
 package com.avionix.weather.controller;
 
-import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -17,7 +17,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping
-@Tag(name = "Weather", description = "METAR · TAF · SIGMET · PIREP ingestion and ML hazard prediction")
+@Tag(name = "Weather", description = "METAR / TAF / SIGMET / PIREP ingestion and ML hazard prediction")
 @SecurityRequirement(name = "bearerAuth")
 public class WeatherController {
 
@@ -101,7 +101,8 @@ public class WeatherController {
         private Integer lookaheadMinutes;
         @Schema(description = "List of detected hazards")
         private List<Map<String, Object>> hazards;
-        @Schema(description = "Overall risk level", example = "MODERATE", allowableValues = {"NONE","LOW","MODERATE","HIGH","CRITICAL"})
+        @Schema(description = "Overall risk level", example = "MODERATE",
+                allowableValues = {"NONE","LOW","MODERATE","HIGH","CRITICAL"})
         private String overallRisk;
         private Instant generatedAt;
     }
@@ -120,7 +121,7 @@ public class WeatherController {
     @GetMapping("/metar/{icao}")
     @PreAuthorize("hasAnyRole('ATC_TRAINEE','ATC_CONTROLLER','ATC_SUPERVISOR','PILOT','SUPER_ADMIN')")
     @Operation(summary = "Get latest METAR for station")
-    @ApiResponse(responseCode = "404", description = "No METAR found for station")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No METAR found for station")
     public ResponseEntity<ApiResponse<MetarRecord>> getMetar(
             @PathVariable @Size(min=4,max=4) String icao) {
         MetarRecord m = MetarRecord.builder()
@@ -134,7 +135,7 @@ public class WeatherController {
     @PostMapping("/metar")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     @Operation(summary = "Ingest new METAR observation")
-    @ApiResponse(responseCode = "201", description = "METAR ingested")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "METAR ingested")
     public ResponseEntity<ApiResponse<MetarRecord>> ingestMetar(@Valid @RequestBody IngestMetarRequest req) {
         MetarRecord m = MetarRecord.builder()
             .id(UUID.randomUUID()).stationIcao(req.getStationIcao())
@@ -148,7 +149,7 @@ public class WeatherController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> getTaf(
             @PathVariable @Size(min=4,max=4) String icao) {
         return ResponseEntity.ok(ApiResponse.ok(Map.of("station_icao", icao.toUpperCase(), "raw_text",
-            "TAF " + icao.toUpperCase() + " valid 24h — simulated")));
+            "TAF " + icao.toUpperCase() + " valid 24h - simulated")));
     }
 
     @GetMapping("/sigmets")
@@ -164,7 +165,7 @@ public class WeatherController {
     @PreAuthorize("hasAnyRole('ATC_SUPERVISOR','SUPER_ADMIN')")
     @Operation(summary = "Issue a new SIGMET",
         description = "Creates and publishes a SIGMET. Phenomena: TS, TURB, ICE, VA, RDOACT, TC, MTW, SEV_ICE.")
-    @ApiResponse(responseCode = "201", description = "SIGMET issued")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "SIGMET issued")
     public ResponseEntity<ApiResponse<SigmetRecord>> issueSigmet(@Valid @RequestBody IssueSigmetRequest req) {
         SigmetRecord s = SigmetRecord.builder()
             .id(UUID.randomUUID()).fir(req.getFir()).phenomenon(req.getPhenomenon())
@@ -177,7 +178,7 @@ public class WeatherController {
     @PostMapping("/pireps")
     @PreAuthorize("hasAnyRole('ATC_CONTROLLER','ATC_SUPERVISOR','PILOT','SUPER_ADMIN')")
     @Operation(summary = "Submit a PIREP (pilot weather report)")
-    @ApiResponse(responseCode = "201", description = "PIREP recorded")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "PIREP recorded")
     public ResponseEntity<ApiResponse<Map<String, Object>>> submitPirep(@Valid @RequestBody SubmitPirepRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.ok(Map.of("id", UUID.randomUUID(), "callsign", req.getCallsign(),

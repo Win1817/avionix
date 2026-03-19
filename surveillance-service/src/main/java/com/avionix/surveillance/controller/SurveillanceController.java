@@ -1,8 +1,8 @@
 package com.avionix.surveillance.controller;
 
-import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -85,7 +85,7 @@ public class SurveillanceController {
     @Operation(summary = "Ingest position batch",
         description = "Accepts batched position reports from ADS-B receivers, SSR, or MLAT systems. " +
                        "Persists to surveillance_reports table and publishes to Kafka for real-time consumers.")
-    @ApiResponse(responseCode = "201", description = "Positions ingested")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Positions ingested")
     public ResponseEntity<ApiResponse<Map<String, Integer>>> ingestPositions(
             @Valid @RequestBody IngestRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
