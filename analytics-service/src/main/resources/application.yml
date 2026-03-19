@@ -1,7 +1,7 @@
 server:
   port: 3006
   servlet:
-    context-path: /api/analytics
+    context-path: /analytics-service
 spring:
   application:
     name: analytics-service

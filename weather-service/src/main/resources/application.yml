@@ -1,7 +1,7 @@
 server:
   port: 3005
   servlet:
-    context-path: /api/weather
+    context-path: /weather-service
 spring:
   application:
     name: weather-service

@@ -1,7 +1,7 @@
 server:
   port: 3001
   servlet:
-    context-path: /api/fdps
+    context-path: /fdps-service
 
 spring:
   application:

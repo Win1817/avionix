@@ -1,7 +1,7 @@
 server:
   port: 3003
   servlet:
-    context-path: /api/surveillance
+    context-path: /surveillance-service
 spring:
   application:
     name: surveillance-service

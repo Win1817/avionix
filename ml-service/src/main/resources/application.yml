@@ -1,7 +1,7 @@
 server:
   port: 3007
   servlet:
-    context-path: /api/ml
+    context-path: /ml-service
 spring:
   application:
     name: ml-service

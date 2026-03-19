@@ -1,7 +1,7 @@
 server:
   port: 3004
   servlet:
-    context-path: /api/coordination
+    context-path: /coordination-service
 spring:
   application:
     name: coordination-service
