@@ -15,7 +15,7 @@
   <artifactId>snet-service</artifactId>
   <version>2.0.0</version>
   <packaging>jar</packaging>
-  <n>AVIONIX snet-service</n>
+  <name>AVIONIX snet-service</name>
   <description>AVIONIX Safety Nets Service — STCA, MSAW, APW alert detection</description>
 
   <properties>
