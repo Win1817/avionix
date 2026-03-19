@@ -29,6 +29,7 @@ spring:
           predicates:
             - Path=/api/fdps/**
           filters:
+            - RewritePath=/api/fdps/(?<segment>.*), /fdps-service/${segment}
             - name: CircuitBreaker
               args:
                 name: fdps-cb
@@ -40,6 +41,7 @@ spring:
           predicates:
             - Path=/api/snet/**
           filters:
+            - RewritePath=/api/snet/(?<segment>.*), /snet-service/${segment}
             - name: CircuitBreaker
               args:
                 name: snet-cb
@@ -50,36 +52,48 @@ spring:
           uri: http://${SURVEILLANCE_HOST:surveillance-service}:3003
           predicates:
             - Path=/api/surveillance/**
+          filters:
+            - RewritePath=/api/surveillance/(?<segment>.*), /surveillance-service/${segment}
 
         # ── COORDINATION ──────────────────────────────────────────────────────
         - id: coordination-service
           uri: http://${COORDINATION_HOST:coordination-service}:3004
           predicates:
             - Path=/api/coordination/**
+          filters:
+            - RewritePath=/api/coordination/(?<segment>.*), /coordination-service/${segment}
 
         # ── WEATHER ───────────────────────────────────────────────────────────
         - id: weather-service
           uri: http://${WEATHER_HOST:weather-service}:3005
           predicates:
             - Path=/api/weather/**
+          filters:
+            - RewritePath=/api/weather/(?<segment>.*), /weather-service/${segment}
 
         # ── ANALYTICS ─────────────────────────────────────────────────────────
         - id: analytics-service
           uri: http://${ANALYTICS_HOST:analytics-service}:3006
           predicates:
             - Path=/api/analytics/**
+          filters:
+            - RewritePath=/api/analytics/(?<segment>.*), /analytics-service/${segment}
 
         # ── ML ────────────────────────────────────────────────────────────────
         - id: ml-service
           uri: http://${ML_HOST:ml-service}:3007
           predicates:
             - Path=/api/ml/**
+          filters:
+            - RewritePath=/api/ml/(?<segment>.*), /ml-service/${segment}
 
         # ── INGEST ────────────────────────────────────────────────────────────
         - id: ingest-service
           uri: http://${INGEST_HOST:ingest-service}:3008
           predicates:
             - Path=/api/ingest/**
+          filters:
+            - RewritePath=/api/ingest/(?<segment>.*), /ingest-service/${segment}
 
         # ── SWAGGER DOC AGGREGATION ───────────────────────────────────────────
         - id: fdps-swagger
@@ -87,56 +101,56 @@ spring:
           predicates:
             - Path=/swagger/fdps/**
           filters:
-            - RewritePath=/swagger/fdps/(?<segment>.*), /api/fdps/${segment}
+            - RewritePath=/swagger/fdps/(?<segment>.*), /fdps-service/${segment}
 
         - id: snet-swagger
           uri: http://${SNET_HOST:snet-service}:3002
           predicates:
             - Path=/swagger/snet/**
           filters:
-            - RewritePath=/swagger/snet/(?<segment>.*), /api/snet/${segment}
+            - RewritePath=/swagger/snet/(?<segment>.*), /snet-service/${segment}
 
         - id: surveillance-swagger
           uri: http://${SURVEILLANCE_HOST:surveillance-service}:3003
           predicates:
             - Path=/swagger/surveillance/**
           filters:
-            - RewritePath=/swagger/surveillance/(?<segment>.*), /api/surveillance/${segment}
+            - RewritePath=/swagger/surveillance/(?<segment>.*), /surveillance-service/${segment}
 
         - id: coordination-swagger
           uri: http://${COORDINATION_HOST:coordination-service}:3004
           predicates:
             - Path=/swagger/coordination/**
           filters:
-            - RewritePath=/swagger/coordination/(?<segment>.*), /api/coordination/${segment}
+            - RewritePath=/swagger/coordination/(?<segment>.*), /coordination-service/${segment}
 
         - id: weather-swagger
           uri: http://${WEATHER_HOST:weather-service}:3005
           predicates:
             - Path=/swagger/weather/**
           filters:
-            - RewritePath=/swagger/weather/(?<segment>.*), /api/weather/${segment}
+            - RewritePath=/swagger/weather/(?<segment>.*), /weather-service/${segment}
 
         - id: analytics-swagger
           uri: http://${ANALYTICS_HOST:analytics-service}:3006
           predicates:
             - Path=/swagger/analytics/**
           filters:
-            - RewritePath=/swagger/analytics/(?<segment>.*), /api/analytics/${segment}
+            - RewritePath=/swagger/analytics/(?<segment>.*), /analytics-service/${segment}
 
         - id: ml-swagger
           uri: http://${ML_HOST:ml-service}:3007
           predicates:
             - Path=/swagger/ml/**
           filters:
-            - RewritePath=/swagger/ml/(?<segment>.*), /api/ml/${segment}
+            - RewritePath=/swagger/ml/(?<segment>.*), /ml-service/${segment}
 
         - id: ingest-swagger
           uri: http://${INGEST_HOST:ingest-service}:3008
           predicates:
             - Path=/swagger/ingest/**
           filters:
-            - RewritePath=/swagger/ingest/(?<segment>.*), /api/ingest/${segment}
+            - RewritePath=/swagger/ingest/(?<segment>.*), /ingest-service/${segment}
 
 # Swagger UI aggregation — shows all service APIs in one UI
 springdoc:
