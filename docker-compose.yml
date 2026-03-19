@@ -255,7 +255,7 @@ services:
       VITE_KEYCLOAK_URL: http://localhost:8080
       VITE_KEYCLOAK_REALM: avionix
       VITE_KEYCLOAK_CLIENT_ID: avionix-frontend
-    ports: ["5173:80"]
+    ports: ["8050:80"]
     networks: [avionix-net]
 
   # ─── SIMULATOR (opt-in: docker compose --profile simulator up) ───────────────
