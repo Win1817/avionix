@@ -93,17 +93,21 @@ public class SnetController {
         private List<AlertRecord> conflicts;
     }
 
-    @Data @Builder @NoArgsConstructor @AllArgsConstructor
-    public static class ApiResponse<T> {
+    @Data @NoArgsConstructor @AllArgsConstructor
+    public static class SnetResponse<T> {
         private Boolean success;
         private String message;
         private T data;
         private Instant timestamp;
-        public static <T> ApiResponse<T> ok(T data) {
-            return ApiResponse.<T>builder().success(true).message("OK").data(data).timestamp(Instant.now()).build();
+        public static <T> SnetResponse<T> ok(T data) {
+            SnetResponse<T> r = new SnetResponse<>();
+            r.success = true; r.message = "OK"; r.data = data; r.timestamp = Instant.now();
+            return r;
         }
-        public static <T> ApiResponse<T> ok(T data, String msg) {
-            return ApiResponse.<T>builder().success(true).message(msg).data(data).timestamp(Instant.now()).build();
+        public static <T> SnetResponse<T> ok(T data, String msg) {
+            SnetResponse<T> r = new SnetResponse<>();
+            r.success = true; r.message = msg; r.data = data; r.timestamp = Instant.now();
+            return r;
         }
     }
 
@@ -114,7 +118,7 @@ public class SnetController {
     @Operation(summary = "Get active safety alerts",
         description = "Returns all currently active alerts, optionally filtered by severity or type. " +
                        "Ordered by severity (CRITICAL first) then detection time.")
-    public ResponseEntity<ApiResponse<List<AlertRecord>>> getAlerts(
+    public ResponseEntity<SnetResponse<List<AlertRecord>>> getAlerts(
             @Parameter(description = "Filter by severity") @RequestParam(required = false) Severity severity,
             @Parameter(description = "Filter by alert type") @RequestParam(required = false) AlertType type,
             @RequestParam(defaultValue = "100") int limit,
@@ -122,7 +126,7 @@ public class SnetController {
 
         // Stub — service layer would query safety_alerts table
         List<AlertRecord> alerts = Collections.emptyList();
-        return ResponseEntity.ok(ApiResponse.ok(alerts));
+        return ResponseEntity.ok(SnetResponse.ok(alerts));
     }
 
     @PostMapping("/alerts")
@@ -130,7 +134,7 @@ public class SnetController {
     @Operation(summary = "Generate a safety alert",
         description = "Manually create an alert. Broadcasts immediately to all connected controllers via WebSocket.")
     @ApiResponse(responseCode = "201", description = "Alert created and broadcast")
-    public ResponseEntity<ApiResponse<AlertRecord>> generateAlert(
+    public ResponseEntity<SnetResponse<AlertRecord>> generateAlert(
             @Valid @RequestBody GenerateAlertRequest request) {
         AlertRecord alert = AlertRecord.builder()
             .id(UUID.randomUUID())
@@ -144,7 +148,7 @@ public class SnetController {
             .detectionTime(Instant.now())
             .build();
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.ok(alert, "Alert generated and broadcast"));
+            .body(SnetResponse.ok(alert, "Alert generated and broadcast"));
     }
 
     @PutMapping("/alerts/{alertId}/dismiss")
@@ -152,7 +156,7 @@ public class SnetController {
     @Operation(summary = "Acknowledge and dismiss an alert",
         description = "Marks alert as inactive. Records dismissal time, controller, and resolution action in audit trail.")
     @ApiResponse(responseCode = "404", description = "Alert not found")
-    public ResponseEntity<ApiResponse<AlertRecord>> dismissAlert(
+    public ResponseEntity<SnetResponse<AlertRecord>> dismissAlert(
             @PathVariable UUID alertId,
             @RequestBody DismissRequest request) {
         AlertRecord dismissed = AlertRecord.builder()
@@ -160,7 +164,7 @@ public class SnetController {
             .dismissalTime(Instant.now())
             .resolutionAction(request.getResolutionAction())
             .build();
-        return ResponseEntity.ok(ApiResponse.ok(dismissed, "Alert dismissed"));
+        return ResponseEntity.ok(SnetResponse.ok(dismissed, "Alert dismissed"));
     }
 
     @PostMapping("/detect-conflicts")
@@ -168,18 +172,18 @@ public class SnetController {
     @Operation(summary = "Run full airspace conflict scan (STCA)",
         description = "Evaluates all active flight pairs against ICAO separation minima. " +
                        "CRITICAL/HIGH conflicts auto-generate STCA alerts. Uses ML risk scoring.")
-    public ResponseEntity<ApiResponse<ConflictScan>> detectConflicts() {
+    public ResponseEntity<SnetResponse<ConflictScan>> detectConflicts() {
         ConflictScan result = ConflictScan.builder()
             .totalFlights(0).conflictsDetected(0).conflicts(Collections.emptyList()).build();
-        return ResponseEntity.ok(ApiResponse.ok(result));
+        return ResponseEntity.ok(SnetResponse.ok(result));
     }
 
     @PostMapping("/check-msaw")
     @PreAuthorize("hasAnyRole('ATC_CONTROLLER','ATC_SUPERVISOR','SUPER_ADMIN')")
     @Operation(summary = "Run Minimum Safe Altitude Warning (MSAW) check",
         description = "Scans all active aircraft for terrain/altitude violations. Threshold: < 2500 ft AGL.")
-    public ResponseEntity<ApiResponse<List<AlertRecord>>> checkMsaw() {
-        return ResponseEntity.ok(ApiResponse.ok(Collections.emptyList(), "MSAW scan complete"));
+    public ResponseEntity<SnetResponse<List<AlertRecord>>> checkMsaw() {
+        return ResponseEntity.ok(SnetResponse.ok(Collections.emptyList(), "MSAW scan complete"));
     }
 
     @PostMapping("/check-separation")
@@ -187,7 +191,7 @@ public class SnetController {
     @Operation(summary = "Check separation between two specific flights",
         description = "Calculates current horizontal (NM) and vertical (ft) separation " +
                        "and compares against applicable ICAO minima.")
-    public ResponseEntity<ApiResponse<SeparationResult>> checkSeparation(
+    public ResponseEntity<SnetResponse<SeparationResult>> checkSeparation(
             @Schema(description = "Flight IDs to compare")
             @RequestBody Map<String, UUID> request) {
         SeparationResult result = SeparationResult.builder()
@@ -195,6 +199,6 @@ public class SnetController {
             .requiredHorizontalNM(5.0).requiredVerticalFt(1000)
             .horizontalOk(true).verticalOk(true).violates(false)
             .build();
-        return ResponseEntity.ok(ApiResponse.ok(result));
+        return ResponseEntity.ok(SnetResponse.ok(result));
     }
 }
