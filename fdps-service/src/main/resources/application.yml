@@ -1,5 +1,6 @@
 server:
   port: 3001
+  forward-headers-strategy: framework
   servlet:
     context-path: /fdps-service
 

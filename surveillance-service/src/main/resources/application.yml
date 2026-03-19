@@ -1,5 +1,6 @@
 server:
   port: 3003
+  forward-headers-strategy: framework
   servlet:
     context-path: /surveillance-service
 spring:

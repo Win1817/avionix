@@ -1,5 +1,6 @@
 server:
   port: 3006
+  forward-headers-strategy: framework
   servlet:
     context-path: /analytics-service
 spring:

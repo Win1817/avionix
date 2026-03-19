@@ -1,5 +1,6 @@
 server:
   port: 3008
+  forward-headers-strategy: framework
   servlet:
     context-path: /ingest-service
 spring:

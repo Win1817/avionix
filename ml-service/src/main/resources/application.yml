@@ -1,5 +1,6 @@
 server:
   port: 3007
+  forward-headers-strategy: framework
   servlet:
     context-path: /ml-service
 spring:

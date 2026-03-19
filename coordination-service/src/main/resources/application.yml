@@ -1,5 +1,6 @@
 server:
   port: 3004
+  forward-headers-strategy: framework
   servlet:
     context-path: /coordination-service
 spring:
