@@ -15,7 +15,7 @@
   <artifactId>snet-service</artifactId>
   <version>2.0.0</version>
   <packaging>jar</packaging>
-  <name>AVIONIX snet-service</name>
+  <n>AVIONIX snet-service</n>
   <description>AVIONIX Safety Nets Service — STCA, MSAW, APW alert detection</description>
 
   <properties>
@@ -91,6 +91,24 @@
 
   <build>
     <plugins>
+      <!-- Maven Compiler Plugin with Lombok annotation processing -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <source>21</source>
+          <target>21</target>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+      <!-- Spring Boot Maven Plugin -->
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
