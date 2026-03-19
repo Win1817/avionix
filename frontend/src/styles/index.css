@@ -260,20 +260,88 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--text); fon
 .all-pairs h4 { font-size: 11px; color: var(--text-dim); margin-bottom: 6px; }
 
 /* ── LOGIN ──────────────────────────────────────────────────────── */
-.login-page { display: flex; align-items: center; justify-content: center; height: 100vh; background: var(--bg); }
-.login-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 40px; text-align: center; width: 340px; }
-.login-logo { font-size: 48px; margin-bottom: 16px; }
-.login-title { font-family: var(--font-ui); font-size: 28px; font-weight: 700; color: var(--green); letter-spacing: 3px; margin-bottom: 8px; }
-.login-sub { font-size: 12px; color: var(--text-dim); margin-bottom: 30px; }
-.login-btn { background: #001a0d; border: 1px solid var(--green); color: var(--green); font-family: var(--font-mono); font-size: 14px; padding: 12px 28px; cursor: pointer; width: 100%; letter-spacing: 1px; border-radius: 3px; }
-.login-btn:hover { background: #003320; }
-.login-note { font-size: 10px; color: var(--text-dim); margin-top: 14px; }
+.login-page {
+  display: flex; align-items: center; justify-content: center;
+  height: 100vh; background: var(--bg); position: relative; overflow: hidden;
+}
+.login-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 40%, #001830 0%, #060c15 60%);
+  z-index: 0;
+}
+.login-bg::before {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 39px,
+    rgba(0,255,136,0.03) 39px, rgba(0,255,136,0.03) 40px
+  ),
+  repeating-linear-gradient(
+    90deg, transparent, transparent 39px,
+    rgba(0,255,136,0.03) 39px, rgba(0,255,136,0.03) 40px
+  );
+}
+.login-card {
+  position: relative; z-index: 1;
+  background: rgba(10,15,30,0.92);
+  border: 1px solid rgba(0,170,255,0.25);
+  border-radius: 8px; padding: 44px 48px;
+  text-align: center; width: 420px;
+  box-shadow: 0 0 60px rgba(0,100,200,0.15), 0 0 120px rgba(0,100,200,0.06);
+  backdrop-filter: blur(8px);
+}
+.login-logo {
+  width: 100%; max-width: 320px;
+  filter: drop-shadow(0 0 18px rgba(0,170,255,0.5));
+  margin-bottom: 8px;
+  animation: logoPulse 4s ease-in-out infinite;
+}
+.login-sub { font-size: 11px; color: var(--text-dim); margin-bottom: 28px; letter-spacing: 2px; text-transform: uppercase; }
+.login-divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(0,170,255,0.3), transparent); margin-bottom: 28px; }
+.login-btn {
+  background: linear-gradient(135deg, #001830 0%, #001025 100%);
+  border: 1px solid rgba(0,170,255,0.5);
+  color: #00aaff;
+  font-family: var(--font-mono); font-size: 13px;
+  padding: 13px 28px; cursor: pointer; width: 100%;
+  letter-spacing: 2px; border-radius: 4px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+.login-btn:hover {
+  background: linear-gradient(135deg, #00204a 0%, #001830 100%);
+  border-color: #00aaff;
+  box-shadow: 0 0 20px rgba(0,170,255,0.25);
+}
+.login-note { font-size: 10px; color: var(--text-dim); margin-top: 16px; opacity: 0.6; }
 
 /* ── SPLASH ─────────────────────────────────────────────────────── */
-.splash { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: var(--bg); }
-.splash-radar { width: 80px; height: 80px; border: 2px solid var(--green); border-radius: 50%; margin-bottom: 20px; animation: radarSpin 2s linear infinite; border-top-color: transparent; }
-.splash-title { font-family: var(--font-ui); font-size: 32px; font-weight: 700; color: var(--green); letter-spacing: 4px; }
-.splash-sub { font-size: 12px; color: var(--text-dim); margin-top: 8px; }
+.splash {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100vh; background: var(--bg); gap: 20px;
+}
+.splash-logo {
+  width: min(480px, 80vw);
+  filter: drop-shadow(0 0 24px rgba(0,170,255,0.6));
+  animation: logoPulse 3s ease-in-out infinite;
+}
+.splash-bar {
+  width: 300px; height: 2px;
+  background: rgba(0,170,255,0.15); border-radius: 2px; overflow: hidden;
+}
+.splash-bar-fill {
+  height: 100%; width: 30%;
+  background: linear-gradient(90deg, transparent, #00aaff, transparent);
+  animation: scanBar 1.8s ease-in-out infinite;
+}
+.splash-sub { font-size: 11px; color: var(--text-dim); letter-spacing: 3px; text-transform: uppercase; }
+
+/* ── TOPBAR LOGO ────────────────────────────────────────────────── */
+.brand-logo {
+  height: 22px; width: auto;
+  filter: drop-shadow(0 0 6px rgba(0,170,255,0.4));
+  transition: filter 0.2s;
+}
+.brand-logo:hover { filter: drop-shadow(0 0 10px rgba(0,170,255,0.7)); }
 
 /* ── MISC ───────────────────────────────────────────────────────── */
 .loading-screen { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-dim); font-size: 14px; }
@@ -283,6 +351,8 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--text); fon
 @keyframes flashBg     { from { opacity: 1; } to { opacity: 0.5; } }
 @keyframes flashBorder { from { border-color: var(--red); } to { border-color: transparent; } }
 @keyframes radarSpin   { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes logoPulse   { 0%,100% { filter: drop-shadow(0 0 18px rgba(0,170,255,0.5)); } 50% { filter: drop-shadow(0 0 32px rgba(0,170,255,0.85)); } }
+@keyframes scanBar     { 0% { transform: translateX(-200%); } 100% { transform: translateX(500%); } }
 .blink { animation: flashBg 0.6s infinite alternate; }
 
 /* ── SCROLLBARS ─────────────────────────────────────────────────── */

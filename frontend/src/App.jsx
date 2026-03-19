@@ -59,8 +59,8 @@ export default function App() {
   if (!kcReady) {
     return (
       <div className="splash">
-        <div className="splash-radar" />
-        <div className="splash-title">AVIONIX ATC</div>
+        <img src="/avionix-logo.png" alt="AVIONIX" className="splash-logo" />
+        <div className="splash-bar"><div className="splash-bar-fill" /></div>
         <div className="splash-sub">Initializing system...</div>
       </div>
     );

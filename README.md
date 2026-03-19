@@ -1,4 +1,8 @@
-# ✈ AVIONIX — Air Traffic Control Management System
+# AVIONIX — Air Traffic Control Management System
+
+<p align="center">
+  <img src="frontend/public/avionix-logo.png" alt="AVIONIX" width="600" />
+</p>
 
 > **Production-grade ATC platform** built on a microservices architecture with real-time radar surveillance, AI-powered conflict detection, Keycloak RBAC authentication, and a full Controller Working Position (CWP) dashboard.
 

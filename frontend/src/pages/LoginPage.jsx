@@ -9,10 +9,11 @@ export default function LoginPage({ kc }) {
 
   return (
     <div className="login-page">
+      <div className="login-bg" />
       <div className="login-card">
-        <div className="login-logo">✈</div>
-        <h1 className="login-title">AVIONIX ATC</h1>
+        <img src="/avionix-logo.png" alt="AVIONIX" className="login-logo" />
         <p className="login-sub">Air Traffic Control Management System</p>
+        <div className="login-divider" />
         <button className="login-btn" onClick={() => kc.login()}>
           Login with Keycloak SSO
         </button>
