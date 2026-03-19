@@ -1,0 +1,40 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'avionix-gateway'
+    static_configs:
+      - targets: ['api-gateway:4000']
+
+  - job_name: 'avionix-fdps'
+    static_configs:
+      - targets: ['fdps-service:3001']
+
+  - job_name: 'avionix-snet'
+    static_configs:
+      - targets: ['snet-service:3002']
+
+  - job_name: 'avionix-surveillance'
+    static_configs:
+      - targets: ['surveillance-service:3003']
+
+  - job_name: 'avionix-coordination'
+    static_configs:
+      - targets: ['coordination-service:3004']
+
+  - job_name: 'avionix-weather'
+    static_configs:
+      - targets: ['weather-service:3005']
+
+  - job_name: 'avionix-analytics'
+    static_configs:
+      - targets: ['analytics-service:3006']
+
+  - job_name: 'avionix-ml'
+    static_configs:
+      - targets: ['ml-service:3007']
+
+  - job_name: 'avionix-ingest'
+    static_configs:
+      - targets: ['data-ingest-service:3008']

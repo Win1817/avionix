@@ -1,6 +1,7 @@
 version: '3.9'
 
 services:
+  # ─── INFRASTRUCTURE ──────────────────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
     environment:
@@ -11,6 +12,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./shared/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
     ports: ["5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U avionix"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks: [avionix-net]
 
   postgres-keycloak:
@@ -20,12 +26,22 @@ services:
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: ${KC_DB_PASSWORD}
     volumes: [keycloak_db:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks: [avionix-net]
 
   redis:
     image: redis:7-alpine
     command: redis-server --requirepass ${REDIS_PASSWORD}
     ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks: [avionix-net]
 
   zookeeper:
@@ -33,6 +49,7 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_LOG4J_ROOT_LOGLEVEL: WARN
     volumes: [zookeeper_data:/var/lib/zookeeper/data]
     networks: [avionix-net]
 
@@ -47,7 +64,16 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 24
+      KAFKA_HEAP_OPTS: "-Xmx512m -Xms256m"
+      KAFKA_LOG4J_ROOT_LOGLEVEL: WARN
     volumes: [kafka_data:/var/lib/kafka/data]
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list > /dev/null 2>&1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
     networks: [avionix-net]
 
   kafka-ui:
@@ -59,20 +85,43 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
     networks: [avionix-net]
 
+  # ─── AUTH ────────────────────────────────────────────────────────────────────
   keycloak:
-    build: ./keycloak
-    depends_on: [postgres-keycloak]
+    build:
+      context: .
+      dockerfile: keycloak/Dockerfile
+    depends_on:
+      postgres-keycloak:
+        condition: service_healthy
     environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres-keycloak:5432/keycloak
+      KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: ${KC_DB_PASSWORD}
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_HOSTNAME: ${KC_HOSTNAME:-localhost}
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+      KC_LOG_LEVEL: WARN
     ports: ["8080:8080"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health/ready || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 90s
     networks: [avionix-net]
 
+  # ─── CORE ENTRY POINTS ───────────────────────────────────────────────────────
   api-gateway:
-    build: ./api-gateway
-    depends_on: [keycloak, fdps-service, snet-service]
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    depends_on:
+      keycloak:
+        condition: service_healthy
     env_file: .env
     environment:
       GATEWAY_PORT: 4000
@@ -89,8 +138,14 @@ services:
     restart: unless-stopped
 
   data-ingest-service:
-    build: ./data-ingest-service
-    depends_on: [postgres, kafka, keycloak]
+    build:
+      context: .
+      dockerfile: data-ingest-service/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
     env_file: .env
     environment:
       INGEST_PORT: 3008
@@ -100,9 +155,16 @@ services:
     networks: [avionix-net]
     restart: unless-stopped
 
+  # ─── AVIONIX SERVICES ────────────────────────────────────────────────────────
   fdps-service:
-    build: ./fdps-service
-    depends_on: [postgres, keycloak]
+    build:
+      context: .
+      dockerfile: fdps-service/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
     env_file: .env
     environment:
       FDPS_PORT: 3001
@@ -112,8 +174,14 @@ services:
     restart: unless-stopped
 
   snet-service:
-    build: ./snet-service
-    depends_on: [postgres, keycloak]
+    build:
+      context: .
+      dockerfile: snet-service/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
     env_file: .env
     environment:
       SNET_PORT: 3002
@@ -123,8 +191,14 @@ services:
     restart: unless-stopped
 
   surveillance-service:
-    build: ./surveillance-service
-    depends_on: [postgres, keycloak]
+    build:
+      context: .
+      dockerfile: surveillance-service/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
     env_file: .env
     environment:
       SURVEILLANCE_PORT: 3003
@@ -134,8 +208,14 @@ services:
     restart: unless-stopped
 
   coordination-service:
-    build: ./coordination-service
-    depends_on: [postgres, keycloak]
+    build:
+      context: .
+      dockerfile: coordination-service/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
     env_file: .env
     environment:
       COORDINATION_PORT: 3004
@@ -145,8 +225,14 @@ services:
     restart: unless-stopped
 
   weather-service:
-    build: ./weather-service
-    depends_on: [postgres, keycloak]
+    build:
+      context: .
+      dockerfile: weather-service/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
     env_file: .env
     environment:
       WEATHER_PORT: 3005
@@ -156,8 +242,14 @@ services:
     restart: unless-stopped
 
   analytics-service:
-    build: ./analytics-service
-    depends_on: [postgres, keycloak]
+    build:
+      context: .
+      dockerfile: analytics-service/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
     env_file: .env
     environment:
       ANALYTICS_PORT: 3006
@@ -167,8 +259,14 @@ services:
     restart: unless-stopped
 
   ml-service:
-    build: ./ml-service
-    depends_on: [postgres, keycloak]
+    build:
+      context: .
+      dockerfile: ml-service/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
     env_file: .env
     environment:
       ML_PORT: 3007
@@ -177,8 +275,11 @@ services:
     networks: [avionix-net]
     restart: unless-stopped
 
+  # ─── FRONTEND ────────────────────────────────────────────────────────────────
   frontend:
-    build: ./frontend
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
     depends_on: [api-gateway]
     environment:
       VITE_API_URL: http://localhost:4000/api
@@ -189,9 +290,12 @@ services:
     ports: ["5173:80"]
     networks: [avionix-net]
 
+  # ─── MONITORING ──────────────────────────────────────────────────────────────
   prometheus:
     image: prom/prometheus:latest
-    volumes: [prometheus_data:/prometheus]
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
     ports: ["9090:9090"]
     networks: [avionix-net]
 
@@ -199,26 +303,17 @@ services:
     image: grafana/grafana:latest
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_LOG_LEVEL: warn
     volumes: [grafana_data:/var/lib/grafana]
     ports: ["3000:3000"]
     networks: [avionix-net]
 
-volumes:
-  postgres_data:
-  keycloak_db:
-  kafka_data:
-  zookeeper_data:
-  prometheus_data:
-  grafana_data:
-
-networks:
-  avionix-net:
-    driver: bridge
-
-  # ─── SIMULATOR ───────────────────────────────────────────────────────────────
+  # ─── SIMULATOR (opt-in: docker compose --profile simulator up) ───────────────
   simulator-service:
-    build: ./simulator-service
-    depends_on: [api-gateway, data-ingest-service, fdps-service, weather-service]
+    build:
+      context: .
+      dockerfile: simulator-service/Dockerfile
+    depends_on: [api-gateway, data-ingest-service]
     environment:
       SIM_PORT: 3009
       INGEST_URL: http://data-ingest-service:3008
@@ -232,3 +327,15 @@ networks:
     networks: [avionix-net]
     restart: unless-stopped
     profiles: ["simulator"]
+
+volumes:
+  postgres_data:
+  keycloak_db:
+  kafka_data:
+  zookeeper_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  avionix-net:
+    driver: bridge
