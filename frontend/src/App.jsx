@@ -30,7 +30,7 @@ export default function App() {
   const [kcReady, setKcReady] = useState(false);
 
   useEffect(() => {
-    kc.init({ onLoad: 'check-sso', silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html` })
+    kc.init({ onLoad: 'check-sso', silentCheckSsoRedirectUri: `${window.location.origin}/cwp/silent-check-sso.html` })
       .then((authenticated) => {
         if (authenticated) {
           const roles = kc.tokenParsed?.realm_access?.roles || [];
@@ -67,7 +67,7 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/cwp">
       <Routes>
         <Route path="/login" element={<LoginPage kc={kc} />} />
         <Route path="/" element={<ProtectedRoute><DashboardLayout kc={kc} /></ProtectedRoute>}>
