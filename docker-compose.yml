@@ -121,6 +121,7 @@ services:
       DB_HOST: postgres
       DB_PASSWORD: ${DB_PASSWORD}
       KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ISSUER_URL: http://phantomx.zapto.org
       KAFKA_BROKERS: kafka:29092
     ports: ["3001:3001"]
     networks: [avionix-net]
@@ -137,6 +138,7 @@ services:
       DB_HOST: postgres
       DB_PASSWORD: ${DB_PASSWORD}
       KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ISSUER_URL: http://phantomx.zapto.org
       KAFKA_BROKERS: kafka:29092
     ports: ["3002:3002"]
     networks: [avionix-net]
@@ -153,6 +155,7 @@ services:
       DB_HOST: postgres
       DB_PASSWORD: ${DB_PASSWORD}
       KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ISSUER_URL: http://phantomx.zapto.org
       KAFKA_BROKERS: kafka:29092
     ports: ["3003:3003"]
     networks: [avionix-net]
@@ -169,6 +172,7 @@ services:
       DB_HOST: postgres
       DB_PASSWORD: ${DB_PASSWORD}
       KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ISSUER_URL: http://phantomx.zapto.org
     ports: ["3004:3004"]
     networks: [avionix-net]
     restart: unless-stopped
@@ -184,6 +188,7 @@ services:
       DB_HOST: postgres
       DB_PASSWORD: ${DB_PASSWORD}
       KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ISSUER_URL: http://phantomx.zapto.org
     ports: ["3005:3005"]
     networks: [avionix-net]
     restart: unless-stopped
@@ -199,6 +204,7 @@ services:
       DB_HOST: postgres
       DB_PASSWORD: ${DB_PASSWORD}
       KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ISSUER_URL: http://phantomx.zapto.org
     ports: ["3006:3006"]
     networks: [avionix-net]
     restart: unless-stopped
@@ -214,6 +220,7 @@ services:
       DB_HOST: postgres
       DB_PASSWORD: ${DB_PASSWORD}
       KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ISSUER_URL: http://phantomx.zapto.org
     ports: ["3007:3007"]
     networks: [avionix-net]
     restart: unless-stopped
@@ -229,6 +236,7 @@ services:
       DB_HOST: postgres
       DB_PASSWORD: ${DB_PASSWORD}
       KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ISSUER_URL: http://phantomx.zapto.org
       KAFKA_BROKERS: kafka:29092
     ports: ["3008:3008"]
     networks: [avionix-net]
@@ -242,6 +250,7 @@ services:
       keycloak: { condition: service_healthy }
     environment:
       KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ISSUER_URL: http://phantomx.zapto.org
       FDPS_HOST: fdps-service
       SNET_HOST: snet-service
       SURVEILLANCE_HOST: surveillance-service
