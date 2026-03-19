@@ -26,66 +26,102 @@
     "realm": [
       {
         "name": "SUPER_ADMIN",
-        "description": "Full system access — manage all services, users, and configurations",
+        "description": "Full system access \u2014 manage all services, users, and configurations",
         "composite": false,
         "clientRole": false,
-        "attributes": { "level": ["10"] }
+        "attributes": {
+          "level": [
+            "10"
+          ]
+        }
       },
       {
         "name": "ATC_SUPERVISOR",
         "description": "Supervises controllers, approves overrides, views all sectors",
         "composite": false,
         "clientRole": false,
-        "attributes": { "level": ["8"] }
+        "attributes": {
+          "level": [
+            "8"
+          ]
+        }
       },
       {
         "name": "ATC_CONTROLLER",
-        "description": "Active air traffic controller — full read/write on assigned sector",
+        "description": "Active air traffic controller \u2014 full read/write on assigned sector",
         "composite": false,
         "clientRole": false,
-        "attributes": { "level": ["6"] }
+        "attributes": {
+          "level": [
+            "6"
+          ]
+        }
       },
       {
         "name": "ATC_TRAINEE",
-        "description": "Trainee controller under supervision — read-only with limited actions",
+        "description": "Trainee controller under supervision \u2014 read-only with limited actions",
         "composite": false,
         "clientRole": false,
-        "attributes": { "level": ["4"] }
+        "attributes": {
+          "level": [
+            "4"
+          ]
+        }
       },
       {
         "name": "PILOT",
-        "description": "Pilot — limited access to own flight data and clearances",
+        "description": "Pilot \u2014 limited access to own flight data and clearances",
         "composite": false,
         "clientRole": false,
-        "attributes": { "level": ["3"] }
+        "attributes": {
+          "level": [
+            "3"
+          ]
+        }
       },
       {
         "name": "OPERATIONS_MANAGER",
-        "description": "Airport/Ops manager — read-all, no flight modification",
+        "description": "Airport/Ops manager \u2014 read-all, no flight modification",
         "composite": false,
         "clientRole": false,
-        "attributes": { "level": ["5"] }
+        "attributes": {
+          "level": [
+            "5"
+          ]
+        }
       },
       {
         "name": "SAFETY_OFFICER",
         "description": "Access to all safety alerts, incidents, and reports",
         "composite": false,
         "clientRole": false,
-        "attributes": { "level": ["5"] }
+        "attributes": {
+          "level": [
+            "5"
+          ]
+        }
       },
       {
         "name": "DATA_ANALYST",
-        "description": "Analytics & reporting access — read-only on all data",
+        "description": "Analytics & reporting access \u2014 read-only on all data",
         "composite": false,
         "clientRole": false,
-        "attributes": { "level": ["3"] }
+        "attributes": {
+          "level": [
+            "3"
+          ]
+        }
       },
       {
         "name": "SYSTEM_MONITOR",
         "description": "Infrastructure and system health monitoring access",
         "composite": false,
         "clientRole": false,
-        "attributes": { "level": ["2"] }
+        "attributes": {
+          "level": [
+            "2"
+          ]
+        }
       }
     ]
   },
@@ -95,13 +131,28 @@
       "name": "AVIONIX Frontend",
       "enabled": true,
       "publicClient": true,
-      "redirectUris": ["http://localhost:5173/*", "https://avionix.app/*"],
-      "webOrigins": ["http://localhost:5173", "https://avionix.app"],
+      "redirectUris": [
+        "http://localhost:5173/*",
+        "https://avionix.app/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5173",
+        "https://avionix.app"
+      ],
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
       "protocol": "openid-connect",
-      "defaultClientScopes": ["web-origins", "roles", "profile", "email"],
-      "optionalClientScopes": ["address", "phone", "offline_access"]
+      "defaultClientScopes": [
+        "web-origins",
+        "roles",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access"
+      ]
     },
     {
       "clientId": "avionix-services",
@@ -114,16 +165,60 @@
       "directAccessGrantsEnabled": true,
       "protocol": "openid-connect",
       "secret": "${KEYCLOAK_CLIENT_SECRET}",
-      "defaultClientScopes": ["web-origins", "roles", "profile", "email"],
+      "defaultClientScopes": [
+        "web-origins",
+        "roles",
+        "profile",
+        "email"
+      ],
       "authorizationSettings": {
         "allowRemoteResourceManagement": true,
         "policyEnforcementMode": "ENFORCING",
         "resources": [
-          { "name": "flights", "type": "flight-data", "scopes": ["read", "write", "delete"] },
-          { "name": "alerts", "type": "safety-alert", "scopes": ["read", "write", "dismiss"] },
-          { "name": "sectors", "type": "airspace-sector", "scopes": ["read", "assign", "manage"] },
-          { "name": "analytics", "type": "analytics-report", "scopes": ["read", "export"] },
-          { "name": "users", "type": "user-management", "scopes": ["read", "write", "delete"] }
+          {
+            "name": "flights",
+            "type": "flight-data",
+            "scopes": [
+              "read",
+              "write",
+              "delete"
+            ]
+          },
+          {
+            "name": "alerts",
+            "type": "safety-alert",
+            "scopes": [
+              "read",
+              "write",
+              "dismiss"
+            ]
+          },
+          {
+            "name": "sectors",
+            "type": "airspace-sector",
+            "scopes": [
+              "read",
+              "assign",
+              "manage"
+            ]
+          },
+          {
+            "name": "analytics",
+            "type": "analytics-report",
+            "scopes": [
+              "read",
+              "export"
+            ]
+          },
+          {
+            "name": "users",
+            "type": "user-management",
+            "scopes": [
+              "read",
+              "write",
+              "delete"
+            ]
+          }
         ],
         "policies": [
           {
@@ -131,21 +226,27 @@
             "type": "role",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
-            "roles": [{ "id": "ATC_CONTROLLER", "required": true }]
+            "config": {
+              "roles": "[{\"id\": \"ATC_CONTROLLER\", \"required\": true}]"
+            }
           },
           {
             "name": "SUPERVISOR_POLICY",
             "type": "role",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
-            "roles": [{ "id": "ATC_SUPERVISOR", "required": true }]
+            "config": {
+              "roles": "[{\"id\": \"ATC_SUPERVISOR\", \"required\": true}]"
+            }
           },
           {
             "name": "ADMIN_POLICY",
             "type": "role",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
-            "roles": [{ "id": "SUPER_ADMIN", "required": true }]
+            "config": {
+              "roles": "[{\"id\": \"SUPER_ADMIN\", \"required\": true}]"
+            }
           }
         ]
       }
@@ -154,15 +255,33 @@
   "groups": [
     {
       "name": "ENROUTE_CONTROL",
-      "attributes": { "sectorType": ["ENROUTE"], "fir": ["RPHI"] }
+      "attributes": {
+        "sectorType": [
+          "ENROUTE"
+        ],
+        "fir": [
+          "RPHI"
+        ]
+      }
     },
     {
       "name": "APPROACH_CONTROL",
-      "attributes": { "sectorType": ["APPROACH"], "fir": ["RPHI"] }
+      "attributes": {
+        "sectorType": [
+          "APPROACH"
+        ],
+        "fir": [
+          "RPHI"
+        ]
+      }
     },
     {
       "name": "TOWER_CONTROL",
-      "attributes": { "sectorType": ["TOWER"] }
+      "attributes": {
+        "sectorType": [
+          "TOWER"
+        ]
+      }
     }
   ]
 }
