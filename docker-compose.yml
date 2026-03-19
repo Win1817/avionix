@@ -12,7 +12,9 @@ services:
     ports: ["5432:5432"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U avionix"]
-      interval: 10s; timeout: 5s; retries: 5
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks: [avionix-net]
 
   postgres-keycloak:
@@ -24,7 +26,9 @@ services:
     volumes: [keycloak_db:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U keycloak"]
-      interval: 10s; timeout: 5s; retries: 5
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks: [avionix-net]
 
   redis:
@@ -66,6 +70,7 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
     networks: [avionix-net]
 
+  # ─── AUTH ────────────────────────────────────────────────────────────────────
   keycloak:
     build:
       context: .
@@ -87,18 +92,20 @@ services:
     ports: ["8080:8080"]
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/health/ready || exit 1"]
-      interval: 30s; timeout: 10s; retries: 10; start_period: 90s
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 90s
     networks: [avionix-net]
 
-  # ─── SPRING BOOT MICROSERVICES ────────────────────────────────────────────────
+  # ─── MICROSERVICES — each builds independently from its own directory ─────────
   fdps-service:
     build:
-      context: .
-      dockerfile: services/fdps-service/Dockerfile
+      context: ./fdps-service        # self-contained Spring Boot app
+      dockerfile: Dockerfile
     depends_on:
       postgres: { condition: service_healthy }
       keycloak: { condition: service_healthy }
-    env_file: .env
     environment:
       DB_HOST: postgres
       DB_PASSWORD: ${DB_PASSWORD}
@@ -110,12 +117,11 @@ services:
 
   snet-service:
     build:
-      context: .
-      dockerfile: services/snet-service/Dockerfile
+      context: ./snet-service
+      dockerfile: Dockerfile
     depends_on:
       postgres: { condition: service_healthy }
       keycloak: { condition: service_healthy }
-    env_file: .env
     environment:
       DB_HOST: postgres
       DB_PASSWORD: ${DB_PASSWORD}
@@ -127,12 +133,11 @@ services:
 
   surveillance-service:
     build:
-      context: .
-      dockerfile: services/surveillance-service/Dockerfile
+      context: ./surveillance-service
+      dockerfile: Dockerfile
     depends_on:
       postgres: { condition: service_healthy }
       keycloak: { condition: service_healthy }
-    env_file: .env
     environment:
       DB_HOST: postgres
       DB_PASSWORD: ${DB_PASSWORD}
@@ -144,12 +149,11 @@ services:
 
   coordination-service:
     build:
-      context: .
-      dockerfile: services/coordination-service/Dockerfile
+      context: ./coordination-service
+      dockerfile: Dockerfile
     depends_on:
       postgres: { condition: service_healthy }
       keycloak: { condition: service_healthy }
-    env_file: .env
     environment:
       DB_HOST: postgres
       DB_PASSWORD: ${DB_PASSWORD}
@@ -160,12 +164,11 @@ services:
 
   weather-service:
     build:
-      context: .
-      dockerfile: services/weather-service/Dockerfile
+      context: ./weather-service
+      dockerfile: Dockerfile
     depends_on:
       postgres: { condition: service_healthy }
       keycloak: { condition: service_healthy }
-    env_file: .env
     environment:
       DB_HOST: postgres
       DB_PASSWORD: ${DB_PASSWORD}
@@ -176,12 +179,11 @@ services:
 
   analytics-service:
     build:
-      context: .
-      dockerfile: services/analytics-service/Dockerfile
+      context: ./analytics-service
+      dockerfile: Dockerfile
     depends_on:
       postgres: { condition: service_healthy }
       keycloak: { condition: service_healthy }
-    env_file: .env
     environment:
       DB_HOST: postgres
       DB_PASSWORD: ${DB_PASSWORD}
@@ -192,12 +194,11 @@ services:
 
   ml-service:
     build:
-      context: .
-      dockerfile: services/ml-service/Dockerfile
+      context: ./ml-service
+      dockerfile: Dockerfile
     depends_on:
       postgres: { condition: service_healthy }
       keycloak: { condition: service_healthy }
-    env_file: .env
     environment:
       DB_HOST: postgres
       DB_PASSWORD: ${DB_PASSWORD}
@@ -208,12 +209,11 @@ services:
 
   ingest-service:
     build:
-      context: .
-      dockerfile: services/ingest-service/Dockerfile
+      context: ./ingest-service
+      dockerfile: Dockerfile
     depends_on:
       postgres: { condition: service_healthy }
       keycloak: { condition: service_healthy }
-    env_file: .env
     environment:
       DB_HOST: postgres
       DB_PASSWORD: ${DB_PASSWORD}
@@ -225,11 +225,10 @@ services:
 
   gateway-service:
     build:
-      context: .
-      dockerfile: services/gateway-service/Dockerfile
+      context: ./gateway-service
+      dockerfile: Dockerfile
     depends_on:
       keycloak: { condition: service_healthy }
-    env_file: .env
     environment:
       KEYCLOAK_URL: http://keycloak:8080
       FDPS_HOST: fdps-service
@@ -247,8 +246,8 @@ services:
   # ─── FRONTEND ────────────────────────────────────────────────────────────────
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
     depends_on: [gateway-service]
     environment:
       VITE_API_URL: http://localhost:4000
@@ -259,15 +258,15 @@ services:
     ports: ["5173:80"]
     networks: [avionix-net]
 
-  # ─── SIMULATOR (opt-in) ───────────────────────────────────────────────────────
+  # ─── SIMULATOR (opt-in: docker compose --profile simulator up) ───────────────
   simulator-service:
     build:
-      context: .
-      dockerfile: simulator-service/Dockerfile
+      context: ./simulator-service
+      dockerfile: Dockerfile
     depends_on: [gateway-service, ingest-service]
     environment:
       SIM_PORT: 3009
-      INGEST_URL: http://ingest-service:3008
+      INGEST_URL: http://ingest-service:3008/api/ingest
       GATEWAY_URL: http://gateway-service:4000
       FLIGHT_COUNT: ${SIM_FLIGHT_COUNT:-20}
       POSITION_INTERVAL_MS: ${SIM_POSITION_INTERVAL_MS:-4000}

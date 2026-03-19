@@ -1,15 +1,28 @@
-FROM node:20-alpine AS deps
+# ── Stage 1: Build ─────────────────────────────────────────────────────────────
+FROM maven:3.9-eclipse-temurin-21-alpine AS builder
 WORKDIR /app
-COPY fdps-service/package.json ./
-RUN npm install --omit=dev --no-audit --no-fund
 
-FROM node:20-alpine AS final
+# Cache dependencies separately from source
+COPY pom.xml ./
+RUN mvn dependency:go-offline -q 2>/dev/null || true
+
+# Build
+COPY src ./src
+RUN mvn package -DskipTests -q
+
+# ── Stage 2: Runtime ────────────────────────────────────────────────────────────
+FROM eclipse-temurin:21-jre-alpine AS runtime
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY fdps-service/package.json ./
-COPY fdps-service/src ./src
-COPY shared ./shared
-ENV NODE_ENV=production
+
+# Non-root user
+RUN addgroup -S avionix && adduser -S avionix -G avionix
+USER avionix
+
+COPY --from=builder /app/target/*.jar app.jar
+
+ENV JAVA_OPTS="-Xms128m -Xmx512m -XX:+UseContainerSupport -XX:+UseG1GC"
 EXPOSE 3001
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD wget -qO- http://localhost:3001/health || exit 1
-CMD ["node", "src/index.js"]
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3   CMD wget -qO- http://localhost:3001/actuator/health || exit 1
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
