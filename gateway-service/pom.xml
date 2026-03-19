@@ -14,7 +14,7 @@
   <groupId>com.avionix</groupId>
   <artifactId>gateway-service</artifactId>
   <version>2.0.0</version>
-  <n>AVIONIX API Gateway</n>
+  <name>AVIONIX API Gateway</name>
   <description>Spring Cloud Gateway — routing, JWT auth, rate limiting, aggregated Swagger UI</description>
 
   <properties>
