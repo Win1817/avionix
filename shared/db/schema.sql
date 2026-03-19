@@ -238,7 +238,7 @@ CREATE TABLE IF NOT EXISTS sigmets (
   issued_by UUID REFERENCES users(id)
 );
 
-CREATE INDEX idx_sigmets_valid ON sigmets(valid_to) WHERE valid_to > NOW();
+CREATE INDEX idx_sigmets_valid ON sigmets(valid_to);
 
 -- ─── WEATHER: PIREP ───────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS pireps (
