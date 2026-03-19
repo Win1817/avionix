@@ -23,6 +23,6 @@ COPY --from=builder /app/target/*.jar app.jar
 ENV JAVA_OPTS="-Xms128m -Xmx512m -XX:+UseContainerSupport -XX:+UseG1GC"
 EXPOSE 3003
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3   CMD wget -qO- http://localhost:3003/actuator/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3   CMD wget -qO- http://localhost:3003/api/surveillance/actuator/health || exit 1
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
