@@ -1,0 +1,180 @@
+server:
+  port: 4000
+
+spring:
+  application:
+    name: gateway-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_URL:http://keycloak:8080}/realms/avionix
+          jwk-set-uri: ${KEYCLOAK_URL:http://keycloak:8080}/realms/avionix/protocol/openid-connect/certs
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods: [GET, POST, PUT, DELETE, PATCH, OPTIONS]
+            allowedHeaders: "*"
+            allowCredentials: true
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+      routes:
+
+        # ── FDPS ──────────────────────────────────────────────────────────────
+        - id: fdps-service
+          uri: http://${FDPS_HOST:fdps-service}:3001
+          predicates:
+            - Path=/api/fdps/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: fdps-cb
+                fallbackUri: forward:/fallback
+
+        # ── SNET ──────────────────────────────────────────────────────────────
+        - id: snet-service
+          uri: http://${SNET_HOST:snet-service}:3002
+          predicates:
+            - Path=/api/snet/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: snet-cb
+                fallbackUri: forward:/fallback
+
+        # ── SURVEILLANCE ──────────────────────────────────────────────────────
+        - id: surveillance-service
+          uri: http://${SURVEILLANCE_HOST:surveillance-service}:3003
+          predicates:
+            - Path=/api/surveillance/**
+
+        # ── COORDINATION ──────────────────────────────────────────────────────
+        - id: coordination-service
+          uri: http://${COORDINATION_HOST:coordination-service}:3004
+          predicates:
+            - Path=/api/coordination/**
+
+        # ── WEATHER ───────────────────────────────────────────────────────────
+        - id: weather-service
+          uri: http://${WEATHER_HOST:weather-service}:3005
+          predicates:
+            - Path=/api/weather/**
+
+        # ── ANALYTICS ─────────────────────────────────────────────────────────
+        - id: analytics-service
+          uri: http://${ANALYTICS_HOST:analytics-service}:3006
+          predicates:
+            - Path=/api/analytics/**
+
+        # ── ML ────────────────────────────────────────────────────────────────
+        - id: ml-service
+          uri: http://${ML_HOST:ml-service}:3007
+          predicates:
+            - Path=/api/ml/**
+
+        # ── INGEST ────────────────────────────────────────────────────────────
+        - id: ingest-service
+          uri: http://${INGEST_HOST:ingest-service}:3008
+          predicates:
+            - Path=/api/ingest/**
+
+        # ── SWAGGER DOC AGGREGATION ───────────────────────────────────────────
+        - id: fdps-swagger
+          uri: http://${FDPS_HOST:fdps-service}:3001
+          predicates:
+            - Path=/swagger/fdps/**
+          filters:
+            - RewritePath=/swagger/fdps/(?<segment>.*), /api/fdps/${segment}
+
+        - id: snet-swagger
+          uri: http://${SNET_HOST:snet-service}:3002
+          predicates:
+            - Path=/swagger/snet/**
+          filters:
+            - RewritePath=/swagger/snet/(?<segment>.*), /api/snet/${segment}
+
+        - id: surveillance-swagger
+          uri: http://${SURVEILLANCE_HOST:surveillance-service}:3003
+          predicates:
+            - Path=/swagger/surveillance/**
+          filters:
+            - RewritePath=/swagger/surveillance/(?<segment>.*), /api/surveillance/${segment}
+
+        - id: coordination-swagger
+          uri: http://${COORDINATION_HOST:coordination-service}:3004
+          predicates:
+            - Path=/swagger/coordination/**
+          filters:
+            - RewritePath=/swagger/coordination/(?<segment>.*), /api/coordination/${segment}
+
+        - id: weather-swagger
+          uri: http://${WEATHER_HOST:weather-service}:3005
+          predicates:
+            - Path=/swagger/weather/**
+          filters:
+            - RewritePath=/swagger/weather/(?<segment>.*), /api/weather/${segment}
+
+        - id: analytics-swagger
+          uri: http://${ANALYTICS_HOST:analytics-service}:3006
+          predicates:
+            - Path=/swagger/analytics/**
+          filters:
+            - RewritePath=/swagger/analytics/(?<segment>.*), /api/analytics/${segment}
+
+        - id: ml-swagger
+          uri: http://${ML_HOST:ml-service}:3007
+          predicates:
+            - Path=/swagger/ml/**
+          filters:
+            - RewritePath=/swagger/ml/(?<segment>.*), /api/ml/${segment}
+
+        - id: ingest-swagger
+          uri: http://${INGEST_HOST:ingest-service}:3008
+          predicates:
+            - Path=/swagger/ingest/**
+          filters:
+            - RewritePath=/swagger/ingest/(?<segment>.*), /api/ingest/${segment}
+
+# Swagger UI aggregation — shows all service APIs in one UI
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    config-url: /v3/api-docs/swagger-config
+    urls:
+      - name: FDPS — Flight Data Processing
+        url: /swagger/fdps/api-docs
+      - name: SNET — Safety Nets
+        url: /swagger/snet/api-docs
+      - name: Surveillance
+        url: /swagger/surveillance/api-docs
+      - name: Coordination
+        url: /swagger/coordination/api-docs
+      - name: Weather
+        url: /swagger/weather/api-docs
+      - name: Analytics
+        url: /swagger/analytics/api-docs
+      - name: ML / AI
+        url: /swagger/ml/api-docs
+      - name: Data Ingest
+        url: /swagger/ingest/api-docs
+  api-docs:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    org.springframework.security: WARN
