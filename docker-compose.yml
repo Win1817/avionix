@@ -268,13 +268,13 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_KEYCLOAK_URL: http://phantomx.zapto.org
+        VITE_KEYCLOAK_REALM: avionix
+        VITE_KEYCLOAK_CLIENT_ID: avionix-frontend
+        VITE_API_URL: http://phantomx.zapto.org/api
+        VITE_WS_URL: ws://phantomx.zapto.org/ws
     depends_on: [gateway-service]
-    environment:
-      VITE_API_URL: http://phantomx.zapto.org/api
-      VITE_WS_URL: ws://phantomx.zapto.org/ws
-      VITE_KEYCLOAK_URL: http://phantomx.zapto.org
-      VITE_KEYCLOAK_REALM: avionix
-      VITE_KEYCLOAK_CLIENT_ID: avionix-frontend
     networks: [avionix-net]
 
   # ─── SIMULATOR (opt-in: docker compose --profile simulator up) ───────────────
