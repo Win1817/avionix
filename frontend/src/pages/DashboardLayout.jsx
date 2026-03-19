@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { clearAuth } from '../store/authSlice';
 import { toggleSidebar, removeNotification } from '../store/uiSlice';
 import { analyticsAPI } from '../services/api';
-import { setKpis } from '../store/uiSlice';
+import { setKpis } from '../store/analyticsSlice';
 
 export default function DashboardLayout({ kc }) {
   const dispatch = useDispatch();

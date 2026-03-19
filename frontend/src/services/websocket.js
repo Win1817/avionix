@@ -3,7 +3,7 @@ import { store } from '../store/store';
 import { updatePosition, upsertFlight } from '../store/flightSlice';
 import { addAlert, dismissAlert } from '../store/alertSlice';
 import { setWsStatus, addNotification } from '../store/uiSlice';
-import { setSigmets } from '../store/uiSlice';
+
 
 const WS_URL = import.meta.env.VITE_WS_URL || `ws://${window.location.host}/ws`;
 let ws = null;

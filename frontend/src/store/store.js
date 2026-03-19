@@ -1,19 +1,18 @@
-// store/store.js
 import { configureStore } from '@reduxjs/toolkit';
-import flightReducer from './flightSlice';
-import alertReducer from './alertSlice';
-import authReducer from './authSlice';
-import uiReducer from './uiSlice';
-import weatherReducer from './weatherSlice';
-import analyticsReducer from './analyticsSlice';
+import flightReducer    from './flightSlice.js';
+import alertReducer     from './alertSlice.js';
+import authReducer      from './authSlice.js';
+import uiReducer        from './uiSlice.js';
+import weatherReducer   from './weatherSlice.js';
+import analyticsReducer from './analyticsSlice.js';
 
 export const store = configureStore({
   reducer: {
-    flights: flightReducer,
-    alerts: alertReducer,
-    auth: authReducer,
-    ui: uiReducer,
-    weather: weatherReducer,
+    flights:   flightReducer,
+    alerts:    alertReducer,
+    auth:      authReducer,
+    ui:        uiReducer,
+    weather:   weatherReducer,
     analytics: analyticsReducer,
   },
   middleware: (getDefaultMiddleware) =>
