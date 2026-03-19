@@ -105,7 +105,7 @@ services:
       test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/8080'"]
       interval: 10s
       timeout: 5s
-      start_period: 30s
+      start_period: 90s
       retries: 10
     networks: [avionix-net]
 
