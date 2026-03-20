@@ -15,15 +15,8 @@ public class SecurityConfig {
         http
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .authorizeExchange(exchanges -> exchanges
-                // Allow health checks and actuator endpoints unauthenticated
-                .pathMatchers("/actuator/**", "/fallback").permitAll()
-                // Allow WebSocket upgrade
-                .pathMatchers("/ws/**", "/ws").permitAll()
-                // Everything else requires authentication
-                .anyExchange().authenticated()
-            )
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> {}) // JWT config comes from application.yml
+                // Gateway is a routing layer only — downstream services enforce their own auth
+                .anyExchange().permitAll()
             );
         return http.build();
     }
