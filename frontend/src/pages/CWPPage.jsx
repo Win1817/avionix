@@ -9,13 +9,24 @@ import FlightStrips from '../components/CWP/FlightStrips';
 import AlertsPanel from '../components/CWP/AlertsPanel';
 import FlightDetail from '../components/CWP/FlightDetail';
 
+// Normalise API response — handles both:
+//   { success: true, data: [...] }            (plain array)
+//   { success: true, data: { content: [...] } } (Spring Page)
+function extractList(res) {
+  if (!res || !res.success) return null;
+  const d = res.data;
+  if (Array.isArray(d)) return d;
+  if (d && Array.isArray(d.content)) return d.content;
+  return [];
+}
+
 export default function CWPPage() {
   const dispatch = useDispatch();
-  const flights = useSelector(s => s.flights.activeFlights);
-  const tracks = useSelector(s => s.flights.tracks);
-  const alerts = useSelector(s => s.alerts.activeAlerts);
+  const flights  = useSelector(s => s.flights.activeFlights);
+  const tracks   = useSelector(s => s.flights.tracks);
+  const alerts   = useSelector(s => s.alerts.activeAlerts);
   const selectedId = useSelector(s => s.flights.selectedFlightId);
-  const { radarMode, showTrajectories, showTracks, zoom, mapCenter } = useSelector(s => s.ui);
+  const { showTrajectories, showTracks } = useSelector(s => s.ui);
   const [trajectories, setTrajectories] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -25,8 +36,10 @@ export default function CWPPage() {
         flightAPI.getFlights({ status: 'ACTIVE' }),
         alertAPI.getAlerts({ limit: 50 }),
       ]);
-      if (flightsRes.success) dispatch(setActiveFlights(flightsRes.data));
-      if (alertsRes.success) dispatch(setAlerts(alertsRes.data));
+      const flightList = extractList(flightsRes);
+      const alertList  = extractList(alertsRes);
+      if (flightList !== null) dispatch(setActiveFlights(flightList));
+      if (alertList  !== null) dispatch(setAlerts(alertList));
     } catch (e) {
       console.error('CWP load error', e);
     } finally {
@@ -34,23 +47,32 @@ export default function CWPPage() {
     }
   }, [dispatch]);
 
-  useEffect(() => { loadData(); const t = setInterval(loadData, 15000); return () => clearInterval(t); }, [loadData]);
+  useEffect(() => {
+    loadData();
+    const t = setInterval(loadData, 15000);
+    return () => clearInterval(t);
+  }, [loadData]);
 
   // Load trajectory for selected flight
   useEffect(() => {
     if (!selectedId) return;
     flightAPI.getTrajectory(selectedId)
-      .then(r => { if (r.success) setTrajectories(t => ({ ...t, [selectedId]: r.data?.trajectory_points })); })
+      .then(r => {
+        if (r?.success) {
+          setTrajectories(t => ({ ...t, [selectedId]: r.data?.trajectory_points }));
+        }
+      })
       .catch(() => {});
   }, [selectedId]);
 
-  const selectedFlight = flights.find(f => f.id === selectedId);
+  const selectedFlight = Array.isArray(flights)
+    ? flights.find(f => f.id === selectedId)
+    : null;
 
   if (loading) return <div className="loading-screen">Loading airspace picture...</div>;
 
   return (
     <div className="cwp-layout">
-      {/* Left: Flight Strips */}
       <aside className="cwp-strips">
         <FlightStrips
           flights={flights}
@@ -60,7 +82,6 @@ export default function CWPPage() {
         />
       </aside>
 
-      {/* Center: Radar Scope */}
       <section className="cwp-radar">
         <RadarScope
           flights={flights}
@@ -74,7 +95,6 @@ export default function CWPPage() {
         />
       </section>
 
-      {/* Right: Alerts + Flight Detail */}
       <aside className="cwp-right">
         <AlertsPanel
           alerts={alerts}

@@ -38,7 +38,7 @@ export default function DashboardLayout({ kc }) {
       <header className="topbar">
         <div className="topbar-left">
           <button className="btn-icon" onClick={() => dispatch(toggleSidebar())}>☰</button>
-          <img src="/avionix-logo.png" alt="AVIONIX" className="brand-logo" />
+          <img src="/cwp/avionix-logo.png" alt="AVIONIX" className="brand-logo" />
           <div className={`ws-badge ws-${wsStatus.toLowerCase()}`}>{wsStatus}</div>
         </div>
         <div className="topbar-center">
