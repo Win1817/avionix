@@ -164,7 +164,7 @@
       "standardFlowEnabled": false,
       "directAccessGrantsEnabled": true,
       "protocol": "openid-connect",
-      "secret": "${KEYCLOAK_CLIENT_SECRET}",
+      "secret": "avionix-svc-secret-2025",
       "defaultClientScopes": [
         "web-origins",
         "roles",
@@ -249,7 +249,8 @@
             }
           }
         ]
-      }
+      },
+      "clientAuthenticatorType": "client-secret"
     }
   ],
   "groups": [
