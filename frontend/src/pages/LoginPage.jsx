@@ -11,7 +11,7 @@ export default function LoginPage({ kc }) {
     <div className="login-page">
       <div className="login-bg" />
       <div className="login-card">
-        <img src="/avionix-logo.png" alt="AVIONIX" className="login-logo" />
+        <img src="/cwp/avionix-logo.png" alt="AVIONIX" className="login-logo" />
         <p className="login-sub">Air Traffic Control Management System</p>
         <div className="login-divider" />
         <button className="login-btn" onClick={() => kc.login()}>

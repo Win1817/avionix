@@ -59,7 +59,7 @@ export default function App() {
   if (!kcReady) {
     return (
       <div className="splash">
-        <img src="/avionix-logo.png" alt="AVIONIX" className="splash-logo" />
+        <img src="/cwp/avionix-logo.png" alt="AVIONIX" className="splash-logo" />
         <div className="splash-bar"><div className="splash-bar-fill" /></div>
         <div className="splash-sub">Initializing system...</div>
       </div>
@@ -71,14 +71,14 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage kc={kc} />} />
         <Route path="/" element={<ProtectedRoute><DashboardLayout kc={kc} /></ProtectedRoute>}>
-          <Route index element={<Navigate to="/cwp" replace />} />
-          <Route path="cwp" element={<CWPPage />} />
+          <Route index element={<CWPPage />} />
+          
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="weather" element={<WeatherPage />} />
           <Route path="coordination" element={<CoordinationPage />} />
           <Route path="ml" element={<MLPage />} />
         </Route>
-        <Route path="*" element={<Navigate to="/cwp" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
