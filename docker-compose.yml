@@ -264,7 +264,6 @@ services:
     ports: ["4000:4000"]
     networks: [avionix-net]
     restart: unless-stopped
-    restart: unless-stopped
 
   # ─── FRONTEND ────────────────────────────────────────────────────────────────
   cwp-service:
