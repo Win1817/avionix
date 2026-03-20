@@ -24,6 +24,14 @@ spring:
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
       routes:
 
+        # ── WEBSOCKET — live alerts and position updates ───────────────────────
+        - id: ws-route
+          uri: ws://${SNET_HOST:snet-service}:3002
+          predicates:
+            - Path=/ws
+          filters:
+            - RewritePath=/ws, /snet-service/ws
+
         # ── FDPS ──────────────────────────────────────────────────────────────
         - id: fdps-service
           uri: http://${FDPS_HOST:fdps-service}:3001
