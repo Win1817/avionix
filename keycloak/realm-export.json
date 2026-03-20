@@ -164,7 +164,7 @@
       "standardFlowEnabled": false,
       "directAccessGrantsEnabled": true,
       "protocol": "openid-connect",
-      "secret": "avionix-svc-secret-2025",
+      "secret": "W7TLuj9oPkPbAb6Hsz2dJWBBvUflEIMR",
       "defaultClientScopes": [
         "web-origins",
         "roles",
