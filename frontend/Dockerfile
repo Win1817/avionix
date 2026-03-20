@@ -17,6 +17,8 @@ ENV VITE_WS_URL=$VITE_WS_URL
 
 COPY package.json ./
 RUN npm install --no-audit --no-fund
+# Cache bust — increment to force full rebuild
+ARG CACHE_BUST=1
 COPY . ./
 RUN npm run build
 

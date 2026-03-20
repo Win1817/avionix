@@ -4,13 +4,20 @@ import { updatePosition, upsertFlight } from '../store/flightSlice';
 import { addAlert, dismissAlert } from '../store/alertSlice';
 import { setWsStatus, addNotification } from '../store/uiSlice';
 
-
 const WS_URL = import.meta.env.VITE_WS_URL || `ws://${window.location.host}/ws`;
+// Only attempt WS if explicitly configured (not the default fallback)
+const WS_ENABLED = !!import.meta.env.VITE_WS_URL;
+
 let ws = null;
 let reconnectTimer = null;
 let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
 
 export const connectWS = (token) => {
+  if (!WS_ENABLED) {
+    console.info('[WS] WebSocket disabled — set VITE_WS_URL to enable');
+    return;
+  }
   if (ws && ws.readyState === WebSocket.OPEN) return;
 
   ws = new WebSocket(`${WS_URL}?token=${token}`);
@@ -34,7 +41,9 @@ export const connectWS = (token) => {
 
   ws.onclose = () => {
     store.dispatch(setWsStatus('DISCONNECTED'));
-    scheduleReconnect(token);
+    if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+      scheduleReconnect(token);
+    }
   };
 
   ws.onerror = () => {
@@ -60,7 +69,7 @@ const handleMessage = (msg) => {
         store.dispatch(addNotification({
           type: 'alert',
           severity: msg.data.severity,
-          message: `${msg.data.alert_type}: ${msg.data.callsign_primary} ${msg.data.callsign_secondary ? `vs ${msg.data.callsign_secondary}` : ''}`,
+          message: `${msg.data.alert_type}: ${msg.data.callsign_primary}${msg.data.callsign_secondary ? ` vs ${msg.data.callsign_secondary}` : ''}`,
         }));
         playAlertSound(msg.data.severity);
       }
@@ -70,9 +79,7 @@ const handleMessage = (msg) => {
       store.dispatch(dismissAlert(msg.data.id));
       break;
     case 'HANDOFF':
-      store.dispatch(addNotification({ type: 'handoff', message: `Handoff: ${msg.data.callsign} → ${msg.data.to_sector}` }));
-      break;
-    case 'WEATHER_UPDATE':
+      store.dispatch(addNotification({ type: 'handoff', message: `Handoff: ${msg.data.callsign} to ${msg.data.to_sector}` }));
       break;
     default:
       break;
@@ -97,6 +104,7 @@ const playAlertSound = (severity) => {
 const scheduleReconnect = (token) => {
   reconnectAttempts++;
   const delay = Math.min(1000 * 2 ** reconnectAttempts, 30000);
+  console.log(`[WS] Reconnecting in ${delay}ms (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`);
   reconnectTimer = setTimeout(() => connectWS(token), delay);
 };
 
