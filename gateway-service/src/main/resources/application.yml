@@ -39,10 +39,6 @@ spring:
             - Path=/api/fdps/**
           filters:
             - RewritePath=/api/fdps/(?<segment>.*), /fdps-service/${segment}
-            - name: CircuitBreaker
-              args:
-                name: fdps-cb
-                fallbackUri: forward:/fallback
 
         # ── SNET ──────────────────────────────────────────────────────────────
         - id: snet-service
@@ -51,10 +47,6 @@ spring:
             - Path=/api/snet/**
           filters:
             - RewritePath=/api/snet/(?<segment>.*), /snet-service/${segment}
-            - name: CircuitBreaker
-              args:
-                name: snet-cb
-                fallbackUri: forward:/fallback
 
         # ── SURVEILLANCE ──────────────────────────────────────────────────────
         - id: surveillance-service
@@ -209,6 +201,10 @@ management:
   endpoint:
     health:
       show-details: always
+      status:
+        order: DOWN, OUT_OF_SERVICE, UNKNOWN, UP
+        http-mapping:
+          UNKNOWN: 200
     gateway:
       enabled: true
 
