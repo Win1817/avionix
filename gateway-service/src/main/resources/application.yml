@@ -186,6 +186,21 @@ springdoc:
   api-docs:
     enabled: true
 
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+    instances:
+      fdps-cb:
+        baseConfig: default
+      snet-cb:
+        baseConfig: default
+
 management:
   endpoints:
     web:
